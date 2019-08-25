@@ -1,6 +1,8 @@
 ﻿#region
 
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using JetBrains.Annotations;
@@ -211,15 +213,26 @@ namespace Morestachio
 		[NotNull]
 		public string Null { get; set; }
 
+		/// <summary>
+		///		Contains a list of Custom expressions that can be used to extend morestachio
+		/// </summary>
+		public IList<ICustomExpression> CustomExpressions { get; set; }
+
 		internal ParserOptions WithPartial(string partialTemplateTemplate)
 		{
-			return new ParserOptions(partialTemplateTemplate, SourceFactory, Encoding, DisableContentEscaping, WithModelInference)
+			var withPartialOptions = new ParserOptions(partialTemplateTemplate, SourceFactory, Encoding, DisableContentEscaping, WithModelInference)
 			{
 				Null = Null,
 				StackOverflowBehavior = StackOverflowBehavior,
 				Formatters = Formatters,
-				Timeout = Timeout
+				Timeout = Timeout,
+				ProfileExecution = ProfileExecution,
+				CustomExpressions = CustomExpressions,
+				ValueResolver = ValueResolver,
+				PartialStackSize = PartialStackSize
 			};
+			withPartialOptions.UnresolvedPath += OnUnresolvedPath;
+			return withPartialOptions;
 		}
 
 		internal void OnUnresolvedPath(string path, Type type)
